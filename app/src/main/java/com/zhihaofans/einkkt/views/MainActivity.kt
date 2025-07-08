@@ -18,9 +18,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.zhihaofans.einkkt.ui.theme.EinkKtTheme
+import com.zhihaofans.einkkt.views.ui.theme.EinkKtTheme
+import io.zhihao.library.android.kotlinEx.startActivity
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,8 +46,11 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
     // 模拟功能列表
+    val context = LocalContext.current
     val buttonList = listOf(
-        "功能一：打开设置" to { println("点击了设置") },
+        "设备信息" to {
+            context.startActivity(DevicesActivity::class.java)
+        },
         "功能二：刷新页面" to { println("点击了刷新") },
         "功能三：退出应用" to { println("点击了退出") }
     )

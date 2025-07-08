@@ -33,7 +33,7 @@ class DevicesActivity : ComponentActivity() {
 @Composable
 fun Greeting2(name: String, modifier: Modifier = Modifier) {
     Text(
-        text = "Hello $name!",
+        text = "设备信息页面更新中",
         modifier = modifier
     )
 }
