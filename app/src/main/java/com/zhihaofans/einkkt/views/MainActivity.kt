@@ -16,11 +16,14 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.zhihaofans.einkkt.views.components.TextAlert
 import com.zhihaofans.einkkt.views.ui.theme.EinkKtTheme
 import io.zhihao.library.android.kotlinEx.startActivity
 
@@ -47,14 +50,24 @@ class MainActivity : ComponentActivity() {
 fun Greeting(name: String, modifier: Modifier = Modifier) {
     // 模拟功能列表
     val context = LocalContext.current
+    val openDialog = remember { mutableStateOf(false) }
+
+    TextAlert(
+        openDialog, "错误", "点击了退出",
+        onConfirmClick = {},
+        onCancelClick = { }
+    )
     val buttonList = listOf(
+        "设置" to {
+            context.startActivity(DevicesActivity::class.java)
+        },
         "设备信息" to {
             context.startActivity(DevicesActivity::class.java)
         },
-        "功能二：刷新页面" to { println("点击了刷新") },
-        "功能三：退出应用" to { println("点击了退出") }
+        "功能三：退出应用" to {
+            openDialog.value = true
+        }
     )
-
     Column(
         modifier = modifier
             .fillMaxSize()
