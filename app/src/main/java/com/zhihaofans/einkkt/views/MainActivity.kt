@@ -1,5 +1,6 @@
 package com.zhihaofans.einkkt.views
 
+import android.app.Activity
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -26,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import com.zhihaofans.einkkt.views.components.TextAlert
 import com.zhihaofans.einkkt.views.ui.theme.EinkKtTheme
 import io.zhihao.library.android.kotlinEx.startActivity
+import io.zhihao.library.android.util.AppUtil
 
 
 class MainActivity : ComponentActivity() {
@@ -54,7 +56,9 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 
     TextAlert(
         openDialog, "错误", "点击了退出",
-        onConfirmClick = {},
+        onConfirmClick = {
+            (context as? Activity)?.finishAffinity()
+        },
         onCancelClick = { }
     )
     val buttonList = listOf(
@@ -63,6 +67,9 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
         },
         "设备信息" to {
             context.startActivity(DevicesActivity::class.java)
+        },
+        "打开系统原生设置" to {
+            AppUtil.launchApp(context, "com.android.settings")
         },
         "功能三：退出应用" to {
             openDialog.value = true
@@ -84,7 +91,7 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
         ) {
             items(buttonList) { (title, onClickFunc) ->
                 Button(
-                    onClick = onClickFunc,
+                    onClick = onClickFunc as () -> Unit,
                     modifier = Modifier
                         .padding(vertical = 8.dp)
                         .fillMaxWidth(0.6f) // 控制按钮宽度
