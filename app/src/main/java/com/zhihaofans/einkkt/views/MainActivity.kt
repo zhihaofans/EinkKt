@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.zhihaofans.einkkt.views.components.MyTopBar
 import com.zhihaofans.einkkt.views.components.TextAlert
 import com.zhihaofans.einkkt.views.ui.theme.EinkKtTheme
 import io.zhihao.library.android.kotlinEx.startActivity
@@ -35,8 +36,13 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+            val context = LocalContext.current
             EinkKtTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                Scaffold(modifier = Modifier.fillMaxSize(), topBar = {
+                    MyTopBar("Eink", false) {
+                        (context as? Activity)?.finish()
+                    }
+                }) { innerPadding ->
                     Greeting(
                         name = "Eink",
                         modifier = Modifier.padding(innerPadding)
