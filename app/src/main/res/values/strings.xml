@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">EinkKt</string>
     <string name="title_activity_devices">DevicesActivity</string>
+    <string name="title_activity_app_manager">AppManagerActivity</string>
 </resources>

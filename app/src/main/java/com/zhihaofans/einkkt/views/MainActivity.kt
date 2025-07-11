@@ -62,8 +62,8 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
         onCancelClick = { }
     )
     val buttonList = listOf(
-        "设置" to {
-            context.startActivity(DevicesActivity::class.java)
+        "应用管理" to {
+            context.startActivity(AppManagerActivity::class.java)
         },
         "设备信息" to {
             context.startActivity(DevicesActivity::class.java)

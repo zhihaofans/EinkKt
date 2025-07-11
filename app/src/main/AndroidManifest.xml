@@ -13,6 +13,11 @@
         android:theme="@style/Theme.EinkKt"
         tools:targetApi="31">
         <activity
+            android:name=".views.AppManagerActivity"
+            android:exported="false"
+            android:label="@string/title_activity_app_manager"
+            android:theme="@style/Theme.EinkKt" />
+        <activity
             android:name=".views.DevicesActivity"
             android:exported="false"
             android:label="@string/title_activity_devices"
