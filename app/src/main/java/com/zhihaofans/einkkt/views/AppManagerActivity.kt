@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -39,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.zhihaofans.einkkt.views.components.MyTopBar
 import com.zhihaofans.einkkt.views.ui.theme.EinkKtTheme
+import io.zhihao.library.android.util.AppUtil
 
 class AppManagerActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -118,11 +120,9 @@ fun AppManagerView(modifier: Modifier = Modifier) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable {
-                            val launchIntent =
-                                context.packageManager.getLaunchIntentForPackage(appInfo.packageName)
-                            launchIntent?.let {
-                                context.startActivity(it)
-                            }
+                            Log.e("AppManagerActivity", "Clicked on ${appInfo.appName}")
+                            AppUtil.launchApp(context, appInfo.packageName)
+                            Log.d("AppManagerActivity", "Launching ${appInfo.packageName}")
                         }
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {
