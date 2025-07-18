@@ -53,15 +53,16 @@ fun Greeting2(name: String, modifier: Modifier = Modifier) {
         text = "设备信息页面更新中",
         modifier = modifier
     )*/
-    DeviceInfoView()
+    DeviceInfoView(modifier)
 }
 
 @Composable
 fun DeviceInfoView(modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val info = remember { DeviceInfoUtil.getDeviceInfo(context) }
-
-    LazyColumn(modifier = modifier.padding(16.dp)) {
+    LazyColumn(
+        modifier = modifier
+    ) {
         items(info.entries.toList()) { entry ->
             Text("${entry.key}: ${entry.value}", modifier = Modifier.padding(vertical = 4.dp))
         }
