@@ -38,11 +38,25 @@ class MainActivity : ComponentActivity() {
         setContent {
             val context = LocalContext.current
             EinkKtTheme {
-                Scaffold(modifier = Modifier.fillMaxSize(), topBar = {
-                    MyTopBar("Eink", false) {
-                        (context as? Activity)?.finish()
-                    }
-                }) { innerPadding ->
+                Scaffold(
+                    modifier = Modifier.fillMaxSize(),
+                    topBar = {
+                        MyTopBar("Eink", false) {
+                            (context as? Activity)?.finish()
+                        }
+                    },
+                    /* floatingActionButton = {
+                         ExtendedFloatingActionButton(
+                             text = { Text("Show snackbar") },
+                             icon = { Icon(Icons.Filled.Build, contentDescription = "") },
+                             onClick = {
+                                 scope.launch {
+                                     snackbarHostState.showSnackbar("Snackbar")
+                                 }
+                             }
+                         )
+                     }*/
+                ) { innerPadding ->
                     Greeting(
                         name = "Eink",
                         modifier = Modifier.padding(innerPadding)
@@ -59,7 +73,6 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
     // 模拟功能列表
     val context = LocalContext.current
     val openDialog = remember { mutableStateOf(false) }
-
     TextAlert(
         openDialog, "错误", "点击了退出",
         onConfirmClick = {
@@ -77,6 +90,9 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
         "打开系统原生设置" to {
             AppUtil.launchApp(context, "com.android.settings")
         },
+        "局域网互传" to {
+            context.startActivity(SendFileActivity::class.java)
+        },
         "功能三：退出应用" to {
             openDialog.value = true
         }
@@ -85,7 +101,8 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
         modifier = modifier
             .fillMaxSize()
             .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally // 水平居中！
+        horizontalAlignment = Alignment.CenterHorizontally, // 水平居中！
+
     ) {
         Text(text = "Hello $name!")
 

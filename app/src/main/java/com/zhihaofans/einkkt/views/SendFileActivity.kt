@@ -1,24 +1,28 @@
 package com.zhihaofans.einkkt.views
 
-import android.content.Context
+import android.graphics.Bitmap
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.google.zxing.BarcodeFormat
+import com.google.zxing.qrcode.QRCodeWriter
 import com.zhihaofans.einkkt.views.ui.theme.EinkKtTheme
 import io.ktor.http.ContentType
 import io.ktor.http.content.PartData
 import io.ktor.http.content.forEachPart
 import io.ktor.http.content.streamProvider
 import io.ktor.serialization.kotlinx.json.json
-import io.ktor.server.application.install
+import io.ktor.server.application.*
 import io.ktor.server.cio.CIO
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
@@ -28,6 +32,8 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
 import java.io.File
+import java.net.Inet4Address
+import java.net.NetworkInterface
 
 class SendFileActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,10 +42,7 @@ class SendFileActivity : ComponentActivity() {
         setContent {
             EinkKtTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting3(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                    FileReceiverScreen(modifier = Modifier.padding(innerPadding))
                 }
             }
         }
@@ -47,14 +50,62 @@ class SendFileActivity : ComponentActivity() {
 }
 
 @Composable
-fun Greeting3(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
+fun FileReceiverScreen(modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    val ipAddress = remember { getLocalIpAddress() ?: "无法获取 IP" }
+    val serverStarted = remember { mutableStateOf(false) }
+    val qrBitmap = remember(ipAddress) { generateQrCodeBitmap("http://$ipAddress:8080") }
+
+    LaunchedEffect(Unit) {
+        if (!serverStarted.value) {
+            startKtorServer(context)
+            serverStarted.value = true
+        }
+    }
+
+    Column(
+        modifier = modifier.padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Text("📥 局域网文件接收服务已启动", style = MaterialTheme.typography.titleMedium)
+        Text("🔗 访问地址: http://$ipAddress:8080")
+        qrBitmap?.let {
+            Image(bitmap = it.asImageBitmap(), contentDescription = "接收二维码")
+        }
+    }
 }
 
-fun startKtorServer(context: Context) {
+fun getLocalIpAddress(): String? {
+    return try {
+        NetworkInterface.getNetworkInterfaces().toList().flatMap { it.inetAddresses.toList() }
+            .firstOrNull { !it.isLoopbackAddress && it is Inet4Address }
+            ?.hostAddress
+    } catch (e: Exception) {
+        null
+    }
+}
+
+fun generateQrCodeBitmap(data: String): Bitmap? {
+    return try {
+        val writer = QRCodeWriter()
+        val bitMatrix = writer.encode(data, BarcodeFormat.QR_CODE, 512, 512)
+        Bitmap.createBitmap(512, 512, Bitmap.Config.RGB_565).apply {
+            for (x in 0 until width) {
+                for (y in 0 until height) {
+                    setPixel(
+                        x,
+                        y,
+                        if (bitMatrix[x, y]) android.graphics.Color.BLACK else android.graphics.Color.WHITE
+                    )
+                }
+            }
+        }
+    } catch (e: Exception) {
+        null
+    }
+}
+
+fun startKtorServer(context: android.content.Context) {
     embeddedServer(CIO, port = 8080, host = "0.0.0.0") {
         install(ContentNegotiation) {
             json()
@@ -118,8 +169,8 @@ fun startKtorServer(context: Context) {
 
 @Preview(showBackground = true)
 @Composable
-fun GreetingPreview4() {
+fun PreviewFileReceiverScreen() {
     EinkKtTheme {
-        Greeting3("Android")
+        FileReceiverScreen()
     }
 }
