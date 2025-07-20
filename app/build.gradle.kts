@@ -66,6 +66,7 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(files("libs/android_library-release.aar"))
     implementation(libs.accompanist.drawablepainter)
+    implementation(libs.logger)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

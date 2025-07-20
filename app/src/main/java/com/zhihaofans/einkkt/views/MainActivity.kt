@@ -91,7 +91,7 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
             AppUtil.launchApp(context, "com.android.settings")
         },
         "局域网互传" to {
-            context.startActivity(SendFileActivity::class.java)
+//            context.startActivity(SendFileActivity::class.java)
         },
         "功能三：退出应用" to {
             openDialog.value = true
