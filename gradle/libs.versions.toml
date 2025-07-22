@@ -5,14 +5,14 @@ coreKtx = "1.16.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
-ktorServerContentNegotiation = "2.3.4"
+ktorServerContentNegotiation = "3.2.2"
 lifecycleRuntimeKtx = "2.9.2"
 activityCompose = "1.10.1"
 composeBom = "2025.07.00"
 accompanistDrawablepainter = "0.37.3"
 ktor = "3.2.2"
-zxing = "3.5.1"
-logger = "2.2.0"
+zxing = "3.5.3"
+orhanobut-logger = "2.2.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -35,7 +35,7 @@ ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx
 ktor-server-core = { module = "io.ktor:ktor-server-core", version.ref = "ktor" }
 ktor-server-cio = { module = "io.ktor:ktor-server-cio", version.ref = "ktor" }
 zxing-core = { module = "com.google.zxing:core", version.ref = "zxing" }
-logger = { group = "com.orhanobut", name = "logger", version.ref = "logger" }
+orhanobut-logger = { group = "com.orhanobut", name = "logger", version.ref = "orhanobut-logger" }
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }

@@ -45,9 +45,6 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
-    kotlinOptions {
-        jvmTarget = "11"
-    }
 }
 kotlin {
     compilerOptions {
@@ -66,7 +63,7 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(files("libs/android_library-release.aar"))
     implementation(libs.accompanist.drawablepainter)
-    implementation(libs.logger)
+    implementation(libs.orhanobut.logger)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
