@@ -29,6 +29,7 @@ import com.zhihaofans.einkkt.views.components.TextAlert
 import com.zhihaofans.einkkt.views.ui.theme.EinkKtTheme
 import io.zhihao.library.android.kotlinEx.startActivity
 import io.zhihao.library.android.util.AppUtil
+import kotlin.system.exitProcess
 
 
 class MainActivity : ComponentActivity() {
@@ -70,13 +71,14 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
-    // 模拟功能列表
+
     val context = LocalContext.current
     val openDialog = remember { mutableStateOf(false) }
     TextAlert(
         openDialog, "错误", "点击了退出",
         onConfirmClick = {
             (context as? Activity)?.finishAffinity()
+            exitProcess(0)
         },
         onCancelClick = { }
     )
@@ -89,6 +91,9 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
         },
         "打开系统原生设置" to {
             AppUtil.launchApp(context, "com.android.settings")
+        },
+        "二维码" to {
+            context.startActivity(QrcodeActivity::class.java)
         },
         "功能三：退出应用" to {
             openDialog.value = true
