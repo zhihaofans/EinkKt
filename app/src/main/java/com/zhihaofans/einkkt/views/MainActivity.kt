@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.zhihaofans.einkkt.views.components.MD3Button
 import com.zhihaofans.einkkt.views.components.MyTopBar
 import com.zhihaofans.einkkt.views.components.TextAlert
 import com.zhihaofans.einkkt.views.ui.theme.EinkKtTheme
@@ -58,7 +59,7 @@ class MainActivity : ComponentActivity() {
                          )
                      }*/
                 ) { innerPadding ->
-                    Greeting(
+                    MainView(
                         name = "Eink",
                         modifier = Modifier.padding(innerPadding)
                     )
@@ -70,7 +71,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
+private fun MainView(name: String, modifier: Modifier = Modifier) {
 
     val context = LocalContext.current
     val openDialog = remember { mutableStateOf(false) }
@@ -130,8 +131,8 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 
 @Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
+fun MainViewPreview() {
     EinkKtTheme {
-        Greeting("Android")
+        MainView("Android")
     }
 }

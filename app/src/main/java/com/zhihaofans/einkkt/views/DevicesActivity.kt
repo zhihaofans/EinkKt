@@ -19,7 +19,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zhihaofans.einkkt.views.components.MyTopBar
 import com.zhihaofans.einkkt.views.ui.theme.EinkKtTheme
@@ -41,24 +40,13 @@ class DevicesActivity : ComponentActivity() {
                         }
                     }
                 ) { innerPadding ->
-                    Greeting2(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                    DeviceInfoView(Modifier.padding(innerPadding))
                 }
             }
         }
     }
 }
 
-@Composable
-fun Greeting2(name: String, modifier: Modifier = Modifier) {
-    /*Text(
-        text = "设备信息页面更新中",
-        modifier = modifier
-    )*/
-    DeviceInfoView(modifier)
-}
 
 @Composable
 fun DeviceInfoView(modifier: Modifier = Modifier) {
@@ -178,13 +166,5 @@ object DeviceInfoUtil {
 
     fun isOneUI(): Boolean {
         return getSystemProperty("ro.build.version.oneui").isNotNullAndEmpty()
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview2() {
-    EinkKtTheme {
-        Greeting2("Android")
     }
 }
