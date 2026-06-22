@@ -1,7 +1,8 @@
 package com.zhihaofans.einkkt.views.components
 
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -19,16 +20,18 @@ import androidx.compose.ui.unit.dp
 fun MyTopBar(
     title: String,
     hasBack: Boolean = false,
+    actions: @Composable RowScope.() -> Unit = {},
     onBackClick: () -> Unit
 ) {
     androidx.compose.foundation.layout.Column {
         TopAppBar(
             title = { Text(text = title) },
+            actions = actions,
             navigationIcon = {
                 if (hasBack) {
                     IconButton(onClick = onBackClick) {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "返回"
                         )
                     }

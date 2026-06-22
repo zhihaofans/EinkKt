@@ -22,12 +22,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.QrCodeScanner
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,139 +56,128 @@ class QrcodeActivity : ComponentActivity() {
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     topBar = {
-                        MyTopBar("二维码", true) {
+                        MyTopBar(
+                            "二维码", true,
+                            actions = {
+                                IconButton(
+                                    onClick = {
+                                        // TODO: 扫描二维码
+                                    }
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.QrCodeScanner,
+                                        contentDescription = "扫描二维码"
+                                    )
+                                }
+                            }) {
                             (context as? Activity)?.finish()
                         }
-                    }
+                    },
                 ) { innerPadding ->
-                    QrcodeView(
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                    var qrContent by remember {
+                        mutableStateOf("https://github.com/zhihaofans")
+                    }
+                    val qrBitmap = remember(qrContent) {
+                        if (qrContent.isBlank()) {
+                            null
+                        } else {
+                            generateQrCode(qrContent)
+                        }
+                    }
+                    val scrollState = rememberScrollState()
+
+                    Column(
+                        modifier = Modifier
+                            .padding(innerPadding)
+                            .fillMaxSize()
+                            .verticalScroll(scrollState)
+                            .imePadding()
+                            .padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+
+                    ) {
+
+                        Text(
+                            text = "二维码工具",
+                            style = MaterialTheme.typography.headlineSmall
+                        )
+
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        Surface(
+                            shape = RoundedCornerShape(16.dp),
+                            color = MaterialTheme.colorScheme.surfaceContainer,
+                            tonalElevation = 2.dp
+                        ) {
+
+                            Box(
+                                modifier = Modifier.padding(24.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                qrBitmap?.let {
+                                    Image(
+                                        bitmap = it.asImageBitmap(),
+
+                                        contentDescription = "二维码",
+
+                                        modifier = Modifier.size(200.dp)
+
+                                    )
+
+                                } ?: Text(
+
+                                    text = "请输入内容生成二维码",
+
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+
+                                )
+
+                            }
+
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        OutlinedTextField(
+
+                            value = qrContent,
+
+                            onValueChange = {
+
+                                qrContent = it
+
+                            },
+
+                            modifier = Modifier.fillMaxWidth(),
+
+                            label = {
+                                Text("二维码内容")
+                            },
+                            supportingText = {
+                                Text("输入内容后二维码会自动更新")
+                            },
+
+                            singleLine = false
+
+                        )
+
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            MD3Button("复制") {
+                                //TODO:copyToClipboard()
+                            }
+                            MD3Button("保存") {
+                                //TODO:saveQrImage()
+                            }
+                            MD3Button("分享") {
+                                //TODO:shareQrImage()
+                            }
+                        }
+                    }
                 }
-            }
-        }
-    }
-}
-
-@Composable
-private fun QrcodeView(modifier: Modifier = Modifier) {
-    var qrContent by remember {
-
-        mutableStateOf("https://github.com/zhihaofans")
-
-    }
-    val qrBitmap = remember(qrContent) {
-
-        if (qrContent.isBlank()) {
-
-            null
-
-        } else {
-
-            generateQrCode(qrContent)
-
-        }
-
-    }
-    val scrollState = rememberScrollState()
-
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(scrollState)
-            .imePadding()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-
-    ) {
-
-        Text(
-
-            text = "二维码工具",
-
-            style = MaterialTheme.typography.headlineSmall
-
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Surface(
-
-            shape = RoundedCornerShape(16.dp),
-
-            color = MaterialTheme.colorScheme.surfaceContainer,
-
-            tonalElevation = 2.dp
-
-        ) {
-
-            Box(
-
-                modifier = Modifier.padding(24.dp),
-
-                contentAlignment = Alignment.Center
-
-            ) {
-                qrBitmap?.let {
-                    Image(
-                        bitmap = it.asImageBitmap(),
-
-                        contentDescription = "二维码",
-
-                        modifier = Modifier.size(200.dp)
-
-                    )
-
-                } ?: Text(
-
-                    text = "请输入内容生成二维码",
-
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-
-                )
-
-            }
-
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        OutlinedTextField(
-
-            value = qrContent,
-
-            onValueChange = {
-
-                qrContent = it
-
-            },
-
-            modifier = Modifier.fillMaxWidth(),
-
-            label = {
-                Text("二维码内容")
-            },
-            supportingText = {
-                Text("输入内容后二维码会自动更新")
-            },
-
-            singleLine = false
-
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            MD3Button("复制") {
-                //TODO:copyToClipboard()
-            }
-            MD3Button("保存") {
-                //TODO:saveQrImage()
-            }
-            MD3Button("分享") {
-                //TODO:shareQrImage()
             }
         }
     }
