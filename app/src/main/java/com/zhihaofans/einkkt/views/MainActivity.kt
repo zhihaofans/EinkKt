@@ -1,7 +1,11 @@
 package com.zhihaofans.einkkt.views
 
 import android.app.Activity
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
+import android.provider.Settings
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -24,14 +28,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.zhihaofans.einkkt.views.components.MD3Button
 import com.zhihaofans.einkkt.views.components.MyTopBar
 import com.zhihaofans.einkkt.views.components.TextAlert
 import com.zhihaofans.einkkt.views.ui.theme.EinkKtTheme
 import io.zhihao.library.android.kotlinEx.startActivity
 import io.zhihao.library.android.util.AppUtil
 import kotlin.system.exitProcess
-
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,7 +65,6 @@ class MainActivity : ComponentActivity() {
                         name = "Eink",
                         modifier = Modifier.padding(innerPadding)
                     )
-
                 }
             }
         }
@@ -72,7 +73,6 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 private fun MainView(name: String, modifier: Modifier = Modifier) {
-
     val context = LocalContext.current
     val openDialog = remember { mutableStateOf(false) }
     TextAlert(
@@ -93,6 +93,9 @@ private fun MainView(name: String, modifier: Modifier = Modifier) {
         "打开系统原生设置" to {
             AppUtil.launchApp(context, "com.android.settings")
         },
+        "打开无线调试" to {
+            openWirelessDebug(context)
+        },
         "二维码" to {
             context.startActivity(QrcodeActivity::class.java)
         },
@@ -105,7 +108,6 @@ private fun MainView(name: String, modifier: Modifier = Modifier) {
             .fillMaxSize()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally, // 水平居中！
-
     ) {
         Text(text = "Hello $name!")
 
@@ -126,6 +128,52 @@ private fun MainView(name: String, modifier: Modifier = Modifier) {
                 }
             }
         }
+    }
+
+}
+
+private fun openWirelessDebug(context: Context) {
+    try {
+        // Android 11+ 部分系统
+        val intent = Intent().apply {
+            setClassName(
+                "com.android.settings",
+                "com.android.settings.Settings\$WirelessDebuggingActivity"
+            )
+        }
+
+        context.startActivity(intent)
+
+    } catch (e: Exception) {
+        try {
+            // 某些 ROM
+            context.startActivity(
+                Intent("android.settings.WIRELESS_DEBUGGING_SETTINGS")
+            )
+
+        } catch (e: Exception) {
+            try {
+                // 某些 ROM
+                context.startActivity(
+                    Intent("com.android.settings.WIFI_ADB_SETTINGS")
+                )
+
+            } catch (e: Exception) {
+                // 最后回退到开发者选项
+                context.startActivity(
+                    Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS)
+                )
+
+                Toast.makeText(
+                    context,
+                    "未找到无线调试页面，请手动进入开发者选项",
+                    Toast.LENGTH_SHORT
+                ).show()
+
+            }
+
+        }
+
     }
 }
 
