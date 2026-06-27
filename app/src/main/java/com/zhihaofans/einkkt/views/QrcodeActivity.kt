@@ -1,11 +1,14 @@
 package com.zhihaofans.einkkt.views
 
 import android.app.Activity
+import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.os.Bundle
+import android.os.Environment
+import android.provider.MediaStore
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -49,7 +52,9 @@ import com.google.zxing.MultiFormatWriter
 import com.zhihaofans.einkkt.views.components.MD3Button
 import com.zhihaofans.einkkt.views.components.MyTopBar
 import com.zhihaofans.einkkt.views.ui.theme.EinkKtTheme
+import io.zhihao.library.android.util.MediaStoreUtil
 import io.zhihao.library.android.util.ShareUtil
+import io.zhihao.library.android.util.ToastUtil
 import java.io.File
 import java.io.FileOutputStream
 
@@ -164,7 +169,20 @@ class QrcodeActivity : ComponentActivity() {
                             MD3Button("保存二维码") {
                                 //TODO:saveQrImage()
                                 if (qrBitmap != null) {
-                                    shareBitmap(context, qrBitmap)
+                                    try {
+//                                    shareBitmap(context, qrBitmap)
+                                        MediaStoreUtil(context).saveImage(
+                                            qrBitmap,
+                                            "qrcode.png",
+                                            "EinkKt"
+                                        )
+                                        ToastUtil(context).showShortToast("二维码已保存到相册")
+                                    } catch (e: Exception) {
+                                        e.printStackTrace()
+                                        ToastUtil(context).showShortToast("保存失败")
+                                    }
+                                } else {
+                                    ToastUtil(context).showShortToast("空白二维码不能保存")
                                 }
                             }
                             MD3Button("分享") {
@@ -181,73 +199,94 @@ class QrcodeActivity : ComponentActivity() {
             }
         }
     }
-}
 
-private fun generateQrCode(
-    content: String,
-    size: Int = 512
-): Bitmap {
-    val bitMatrix = MultiFormatWriter().encode(
-        content,
-        BarcodeFormat.QR_CODE,
-        size,
-        size
-    )
-    val pixels = IntArray(size * size)
-    for (y in 0 until size) {
-        for (x in 0 until size) {
-            pixels[y * size + x] =
-                if (bitMatrix[x, y]) {
-                    Color.BLACK
-                } else {
-                    Color.WHITE
-                }
+    private fun generateQrCode(
+        content: String,
+        size: Int = 512
+    ): Bitmap {
+        val bitMatrix = MultiFormatWriter().encode(
+            content,
+            BarcodeFormat.QR_CODE,
+            size,
+            size
+        )
+        val pixels = IntArray(size * size)
+        for (y in 0 until size) {
+            for (x in 0 until size) {
+                pixels[y * size + x] =
+                    if (bitMatrix[x, y]) {
+                        Color.BLACK
+                    } else {
+                        Color.WHITE
+                    }
+            }
         }
+
+        return Bitmap.createBitmap(
+            pixels,
+            size,
+            size,
+            Bitmap.Config.ARGB_8888
+        )
     }
 
-    return Bitmap.createBitmap(
-        pixels,
-        size,
-        size,
-        Bitmap.Config.ARGB_8888
-    )
-}
+    private fun shareBitmap(
+        context: Context,
+        bitmap: Bitmap,
+        fileName: String = "share.png"
+    ) {
+        try {
+            // 保存到应用缓存目录
+            val file = File(context.cacheDir, fileName)
 
-fun shareBitmap(
-    context: Context,
-    bitmap: Bitmap,
-    fileName: String = "share.png"
-) {
-    try {
-        // 保存到应用缓存目录
-        val file = File(context.cacheDir, fileName)
+            FileOutputStream(file).use { out ->
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+            }
+            // 获取 content:// Uri
+            val uri = FileProvider.getUriForFile(
+                context,
+                "${context.packageName}.fileprovider",
+                file
+            )
+            // 分享
+            val intent = Intent(Intent.ACTION_SEND).apply {
+                type = "image/png"
 
-        FileOutputStream(file).use { out ->
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+                putExtra(Intent.EXTRA_STREAM, uri)
+
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+
+            context.startActivity(
+                Intent.createChooser(intent, "分享二维码")
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            )
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+
         }
-        // 获取 content:// Uri
-        val uri = FileProvider.getUriForFile(
-            context,
-            "${context.packageName}.fileprovider",
-            file
-        )
-        // 分享
-        val intent = Intent(Intent.ACTION_SEND).apply {
-            type = "image/png"
-
-            putExtra(Intent.EXTRA_STREAM, uri)
-
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        }
-
-        context.startActivity(
-            Intent.createChooser(intent, "分享二维码")
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        )
-
-    } catch (e: Exception) {
-        e.printStackTrace()
 
     }
 
+    private fun saveImage(context: Context, bitmap: Bitmap) {
+        val values = ContentValues().apply {
+            put(MediaStore.Images.Media.DISPLAY_NAME, "qrcode.png")
+            put(MediaStore.Images.Media.MIME_TYPE, "image/png")
+            put(
+                MediaStore.Images.Media.RELATIVE_PATH,
+                Environment.DIRECTORY_PICTURES + "/EinkKt"
+            )
+        }
+        val uri = context.contentResolver.insert(
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+            values
+        )
+
+        uri?.let {
+            context.contentResolver.openOutputStream(it)?.use { out ->
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+            }
+        }
+    }
 }
