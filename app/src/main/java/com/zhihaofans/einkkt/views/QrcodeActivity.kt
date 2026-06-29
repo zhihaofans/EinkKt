@@ -1,14 +1,12 @@
 package com.zhihaofans.einkkt.views
 
 import android.app.Activity
-import android.content.ContentValues
-import android.content.Context
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.os.Bundle
-import android.os.Environment
-import android.provider.MediaStore
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -46,17 +44,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.core.content.FileProvider
+import androidx.core.content.getSystemService
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.MultiFormatWriter
 import com.zhihaofans.einkkt.views.components.MD3Button
 import com.zhihaofans.einkkt.views.components.MyTopBar
 import com.zhihaofans.einkkt.views.ui.theme.EinkKtTheme
+import io.zhihao.library.android.kotlinEx.isNotNullAndEmpty
 import io.zhihao.library.android.util.MediaStoreUtil
 import io.zhihao.library.android.util.ShareUtil
 import io.zhihao.library.android.util.ToastUtil
-import java.io.File
-import java.io.FileOutputStream
 
 class QrcodeActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -64,6 +61,21 @@ class QrcodeActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             val context = LocalContext.current
+            val toast = ToastUtil(context)
+            val shareText = when (intent?.action) {
+                Intent.ACTION_SEND ->
+                    intent.getStringExtra(Intent.EXTRA_TEXT)
+
+                else -> null
+            }
+            var qrContent by remember {
+                mutableStateOf(shareText ?: "https://github.com/zhihaofans")
+            }
+            if (shareText.isNotNullAndEmpty()) {
+                toast.showShortToast("已获取分享内容")
+                qrContent = shareText ?: ""
+            }
+            val clipboard = context.getSystemService<ClipboardManager>()
             EinkKtTheme {
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
@@ -86,9 +98,6 @@ class QrcodeActivity : ComponentActivity() {
                         }
                     },
                 ) { innerPadding ->
-                    var qrContent by remember {
-                        mutableStateOf("https://github.com/zhihaofans")
-                    }
                     val qrBitmap = remember(qrContent) {
                         if (qrContent.isBlank()) {
                             null
@@ -162,9 +171,49 @@ class QrcodeActivity : ComponentActivity() {
                         ) {
                             MD3Button("粘贴") {
                                 //TODO:copyToClipboard()
+                                if (clipboard == null) {
+                                    toast.showShortToast("无法获取剪贴板服务")
+                                } else {
+                                    try {
+                                        if (clipboard.hasPrimaryClip()) {
+                                            val text = clipboard.primaryClip
+                                                ?.getItemAt(0)
+                                                ?.coerceToText(context)
+                                                ?.toString()
+                                            if (text.isNullOrEmpty()) {
+                                                toast.showShortToast("剪贴板内容为空")
+                                            } else {
+                                                qrContent = text
+                                                toast.showShortToast("已粘贴剪贴板内容")
+                                            }
+                                        } else {
+                                            toast.showShortToast("剪贴板为空")
+                                        }
+                                    } catch (e: Exception) {
+                                        e.printStackTrace()
+                                        toast.showShortToast("粘贴报错")
+                                    }
+                                }
                             }
                             MD3Button("复制") {
                                 //TODO:copyToClipboard()
+                                if (clipboard == null) {
+                                    toast.showShortToast("无法获取剪贴板服务")
+                                } else if (qrContent.isEmpty()) {
+                                    toast.showShortToast("二维码内容为空")
+                                } else {
+                                    try {
+                                        val clip = ClipData.newPlainText(
+                                            "二维码内容",
+                                            qrContent
+                                        )
+                                        clipboard.setPrimaryClip(clip)
+                                        toast.showShortToast("已复制到剪贴板")
+                                    } catch (e: Exception) {
+                                        e.printStackTrace()
+                                        toast.showShortToast("复制报错")
+                                    }
+                                }
                             }
                             MD3Button("保存二维码") {
                                 //TODO:saveQrImage()
@@ -176,13 +225,13 @@ class QrcodeActivity : ComponentActivity() {
                                             "qrcode.png",
                                             "EinkKt"
                                         )
-                                        ToastUtil(context).showShortToast("二维码已保存到相册")
+                                        toast.showShortToast("二维码已保存到相册")
                                     } catch (e: Exception) {
                                         e.printStackTrace()
-                                        ToastUtil(context).showShortToast("保存失败")
+                                        toast.showShortToast("保存失败")
                                     }
                                 } else {
-                                    ToastUtil(context).showShortToast("空白二维码不能保存")
+                                    toast.showShortToast("空白二维码不能保存")
                                 }
                             }
                             MD3Button("分享") {
@@ -230,63 +279,4 @@ class QrcodeActivity : ComponentActivity() {
         )
     }
 
-    private fun shareBitmap(
-        context: Context,
-        bitmap: Bitmap,
-        fileName: String = "share.png"
-    ) {
-        try {
-            // 保存到应用缓存目录
-            val file = File(context.cacheDir, fileName)
-
-            FileOutputStream(file).use { out ->
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
-            }
-            // 获取 content:// Uri
-            val uri = FileProvider.getUriForFile(
-                context,
-                "${context.packageName}.fileprovider",
-                file
-            )
-            // 分享
-            val intent = Intent(Intent.ACTION_SEND).apply {
-                type = "image/png"
-
-                putExtra(Intent.EXTRA_STREAM, uri)
-
-                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            }
-
-            context.startActivity(
-                Intent.createChooser(intent, "分享二维码")
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            )
-
-        } catch (e: Exception) {
-            e.printStackTrace()
-
-        }
-
-    }
-
-    private fun saveImage(context: Context, bitmap: Bitmap) {
-        val values = ContentValues().apply {
-            put(MediaStore.Images.Media.DISPLAY_NAME, "qrcode.png")
-            put(MediaStore.Images.Media.MIME_TYPE, "image/png")
-            put(
-                MediaStore.Images.Media.RELATIVE_PATH,
-                Environment.DIRECTORY_PICTURES + "/EinkKt"
-            )
-        }
-        val uri = context.contentResolver.insert(
-            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-            values
-        )
-
-        uri?.let {
-            context.contentResolver.openOutputStream(it)?.use { out ->
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
-            }
-        }
-    }
 }

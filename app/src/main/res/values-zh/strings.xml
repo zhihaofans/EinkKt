@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">EinkKt</string>
+    <string name="title_activity_devices">设备</string>
+    <string name="title_activity_app_manager">应用管理</string>
+    <string name="title_activity_qrcode">EinkKt二维码</string>
+</resources>

@@ -51,10 +51,20 @@
         </activity>
         <activity
             android:name=".views.QrcodeActivity"
-            android:exported="false"
+            android:exported="true"
             android:label="@string/title_activity_qrcode"
             android:theme="@style/Theme.EinkKt"
-            android:windowSoftInputMode="adjustResize" />
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+
+                <action android:name="android.intent.action.SEND" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:mimeType="text/*" />
+
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>
